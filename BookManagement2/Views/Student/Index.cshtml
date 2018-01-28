@@ -1,0 +1,195 @@
+﻿@model BookManagement2.Models.Student
+@{
+    ViewBag.Title = "Student Management";
+}
+<h2>Greenwich Student</h2>
+<div class="clearfix">
+    <div style="float:left" id="TableResult" class="col-md-8">
+        <input id="Search" onkeyup="Search()" class="form-control" placeholder="search for names.." />
+        <br />
+        @Html.Action("RenderTable")
+    </div>
+    <div style="float:left" class="col-md-4" id="CreateForm">
+        <h2>Create</h2>
+        @using (Ajax.BeginForm("Create", "Student",
+                    new AjaxOptions
+                    {
+                        HttpMethod = "Post",
+                        OnSuccess = "OnCreate"
+                    }))
+        {
+            <div class="form-horizontal">
+                <hr />
+                <div class="form-group">
+                    <div class="col-md-12">
+                        @Html.EditorFor(model => model.username, new
+                   {
+                       htmlAttributes = new
+                       { @class = "form-control", @placeholder = "User name" }
+                   })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        @Html.EditorFor(model => model.password, new
+                   {
+                       htmlAttributes = new
+                       { @class = "form-control", @placeholder = "Password" }
+                   })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        @Html.EditorFor(model => model.name, new
+                   {
+                       htmlAttributes = new
+                       { @class = "form-control", @placeholder = "Name" }
+                   })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        @Html.EditorFor(model => model.address, new
+                   {
+                       htmlAttributes = new
+                       { @class = "form-control", @placeholder = "Address" }
+                   })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        @Html.EditorFor(model => model.phone, new
+                   {
+                       htmlAttributes = new
+                       { @class = "form-control", @placeholder = "Phone" }
+                   })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        @Html.DropDownList("majorID", null, htmlAttributes: new
+                   { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <input type="submit" value="Create" class="btn btn-default" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="modal fade" id="ModalEdit" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"> Edit Student</h4>
+                </div>
+                <div class="modal-body">
+                    @using (Html.BeginForm("Edit", "Student", FormMethod.Post))
+                    {
+                        <div class="form-horizontal">
+                            <input name="id" id="ID" hidden />
+                            <div class="form-group">
+                                <label class="col-md-2">User name</label>
+                                <div class="col-md-10">
+                                    <input name="username" id="UserName" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-2">Password</label>
+                                <div class="col-md-10">
+                                    <input name="password" id="Password" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-2">Name</label>
+                                <div class="col-md-10">
+                                    <input name="name" id="Name" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-2">Address</label>
+                                <div class="col-md-10">
+                                    <input name="address" id="Address" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-2">Phone</label>
+                                <div class="col-md-10">
+                                    <input name="phone" id="Phone" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-2">Major</label>
+                                <div class="col-md-10">
+                                    <select name="majorID" id="Major" class="form-control">
+                                        @foreach (var item in ViewBag.majorID as SelectList)
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-offset-2 col-md-10">
+                                    <input type="submit" value="Update" class="btn btn-default" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script src="~/Scripts/bootstrap.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script>
+    function OnCreate() {
+        location.reload();
+    }
+    function Edit(id) {
+        $.getJSON("/Student/EditStudent?id=" + id, function (data) {
+            $("#ID").val(data.id)
+            $("#UserName").val(data.username)
+            $("#Password").val(data.password)
+            $("#Name").val(data.name)
+            $("#Address").val(data.address)
+            $("#Phone").val(data.phone)
+            $("#Major option[value='"+ data.majorID +"']").attr("selected","selected")
+            $("#ModalEdit").modal("toggle")
+        });
+    }
+    function OnEdit() {
+        window.location.href = "/Student/Index";
+    }
+    function Delete(id) {
+        $.post("@Url.Action("Delete", "Student")", { id: id }, function (data) {
+            if (data.Success) {
+                window.location.reload();
+            }
+        });
+    }
+    function Search() {
+        var input, filter, table, tr, td, i;
+        input = document.getElementById("Search");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("TableStudent");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+                if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
